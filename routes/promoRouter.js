@@ -1,47 +1,81 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
+const Promotions = require('../models/promotions');
+
 const promoRouter = express.Router();
 
 promoRouter.use(bodyParser.json());
 
 promoRouter.route('/')
-.all((req,res,next)=>{
-    res.statusCode = 200;
-    res.setHeader('Content-Type','text/plain');
-    next();
-})
-.get((req,res,next)=>{
-    res.end("send back all the promos");
-})
-.post((req,res,next)=>{
-    res.end("add the promo " + req.body.name
-    + " with description " + req.body.description);
-})
-.put((req,res,next)=>{
-    res.statusCode = 403;
-    res.end("PUT operation forbidden");
-})
-.delete((req,res,next)=>{
-    res.end("delete all the promos");
-});
+    .get((req, res, next) => {
+        Promotions.find({})
+            .then((promos) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(promos);
+            }, (err) => next(err))
+            .catch((err) => next(err));
+    })
+    .post((req, res, next) => {
+        Promotions.create(req.body)
+            .then((promo) => {
+                console.log('Promotion created ', promo);
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(promo);
+            }, (err) => next(err))
+            .catch((err) => next(err));
+    })
+    .put((req, res, next) => {
+        res.statusCode = 403;
+        res.end("PUT operation forbidden");
+    })
+    .delete((req, res, next) => {
+        Promotions.remove({})
+            .then((resp) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(resp);
+            }, (err) => next(err))
+            .catch((err) => next(err));
+    });
 
 
 
 promoRouter.route('/:promoId')
-.get((req,res,next)=>{
-    res.end("send back promo " + req.params.promoId);
-})
-.post((req,res,next)=>{
-    res.statusCode = 403;
-    res.end("POST operation forbidden on " + req.params.promoId);
-})
-.put((req,res,next)=>{
-    res.write('Updating the promo '+req.params.promoId + '\n');
-    res.end('Will update promo '+req.body.name + ' with details '+req.body.description);
-})
-.delete((req,res,next)=>{
-    res.end("deleting promo "+req.params.promoId);
-});
+    .get((req, res, next) => {
+        Promotions.findById(req.params.promoId)
+            .then((promo) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(promo);
+            }, (err) => next(err))
+            .catch((err) => next(err));
+    })
+    .post((req, res, next) => {
+        res.statusCode = 403;
+        res.end("POST operation forbidden on " + req.params.promoId);
+    })
+    .put((req, res, next) => {
+        Promotions.findByIdAndUpdate(req.params.promoId, {
+            $set: req.body
+        }, { new: true })
+            .then((promo) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(promo);
+            }, (err) => next(err))
+            .catch((err) => next(err));
+    })
+    .delete((req, res, next) => {
+        Promotions.findByIdAndRemove(req.params.promoId)
+            .then((resp) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(resp);
+            }, (err) => next(err))
+            .catch((err) => next(err));
+    });
 
 module.exports = promoRouter;
