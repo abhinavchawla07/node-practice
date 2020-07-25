@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var Users = require('../models/users');
 var passport = require('passport');
+var authenticate = require('../authenticate');
 
 var usersRouter = express.Router();
 
@@ -29,9 +30,11 @@ usersRouter.post('/signup', (req, res, next) => {
 });
 
 usersRouter.post('/login', passport.authenticate('local'), (req, res, next) => {
+	
+	var token = authenticate.getToken({_id:req.user._id})
 	res.statusCode = 200;
 	res.setHeader('Content-Type', 'application/json');
-	res.json({ status: 'Login Successful', success: true });
+	res.json({ status: 'Login Successful', success: true, token:token });
 });
 
 usersRouter.get('/logout', (req, res, next) => {
