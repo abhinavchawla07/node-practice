@@ -53,7 +53,7 @@ usersRouter.post('/signup', cors.corsWithOptions, (req, res, next) => {
 
 usersRouter.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res, next) => {
 
-	var token = authenticate.getToken({ _id: req.user._id })
+	var token = authenticate.getToken({ _id: req.user._id });
 	res.statusCode = 200;
 	res.setHeader('Content-Type', 'application/json');
 	res.json({ status: 'Login Successful', success: true, token: token });
@@ -69,6 +69,15 @@ usersRouter.get('/logout', cors.corsWithOptions, (req, res, next) => {
 		var err = new Error('You are not logged in');
 		err.status = 401;
 		return next(err);
+	}
+});
+
+usersRouter.get('/facebook/token', passport.authenticate('facebook-token'), (req, res) => {
+	if (req.user) {
+		var token = authenticate.getToken({ _id: req.user._id });
+		res.statusCode = 200;
+		res.setHeader('Content-Type', 'application/json');
+		res.json({ status: 'Login Successful', success: true, token: token });
 	}
 });
 
